@@ -5,12 +5,16 @@
  * Description: Lightweight code UI for dev blogs. Adds Prism highlighting, language badges, and one-click copy to Gutenberg code blocks.
  * Version: 1.0.0
  * Author: Alox & Co
- * Author URI: https://codex.alox.co
+ * Author URI: https://alox.co
  * License: MIT
+ * License URI: https://opensource.org/licenses/MIT
  * Text Domain: alox-code-plus
+ * Domain Path: /languages
  */
 
-if (!defined('ABSPATH')) exit;
+if ( ! defined( 'ABSPATH' ) ) {
+    exit;
+}
 
 final class Alox_Code_Plus {
     const VERSION = '1.0.0';
@@ -21,133 +25,132 @@ final class Alox_Code_Plus {
     }
 
     private function __construct() {
-        add_action('wp_enqueue_scripts', [$this, 'enqueue_assets']);
-        add_filter('the_content',       [$this, 'ensure_language_class'], 20);
-        add_filter('the_content',       [$this, 'add_data_lang_from_class'], 21);
-        add_filter('script_loader_tag', [$this, 'add_defer'], 10, 3);
+        add_action( 'plugins_loaded', [ $this, 'load_textdomain' ] );
+        add_action( 'wp_enqueue_scripts', [ $this, 'enqueue_assets' ] );
+        add_filter( 'the_content', [ $this, 'ensure_language_class' ], 20 );
+        add_filter( 'the_content', [ $this, 'add_data_lang_from_class' ], 21 );
+        add_filter( 'script_loader_tag', [ $this, 'add_defer' ], 10, 3 );
     }
 
     /**
-     * Enqueue Prism and UI assets only where needed.
+     * Load plugin translations.
+     */
+    public function load_textdomain() {
+        load_plugin_textdomain( 'alox-code-plus', false, dirname( plugin_basename( __FILE__ ) ) . '/languages' );
+    }
+
+    /**
+     * Enqueue PrismJS and plugin UI assets.
      */
     public function enqueue_assets() {
-        if (!is_singular()) return;
+        if ( ! is_singular() ) {
+            return;
+        }
 
-        $prism_base = apply_filters('alox_code_plus_prism_cdn', 'https://cdn.jsdelivr.net/npm/prismjs@1.29.0');
-        $theme_url  = apply_filters('alox_code_plus_prism_theme_url', $prism_base . '/themes/prism-tomorrow.min.css');
+        $prism_base = apply_filters( 'alox_code_plus_prism_cdn', 'https://cdn.jsdelivr.net/npm/prismjs@1.29.0' );
+        $theme_url  = apply_filters( 'alox_code_plus_prism_theme_url', $prism_base . '/themes/prism-tomorrow.min.css' );
 
         // Prism theme + core
-        wp_enqueue_style('alox-prism', $theme_url, [], null);
-        wp_enqueue_script('alox-prism-core', $prism_base . '/prism.min.js', [], null, true);
+        wp_enqueue_style( 'alox-prism', $theme_url, [], null );
+        wp_enqueue_script( 'alox-prism-core', $prism_base . '/prism.min.js', [], null, true );
 
-        // Component dependency map
+        // Dependencies map
         $depmap = [
-            'markup'             => ['alox-prism-core'],
-            'clike'              => ['alox-prism-core'],
-            'markup-templating'  => ['alox-prism-core', 'alox-prism-markup'],
-
-            // Common languages
-            'php'        => ['alox-prism-core', 'alox-prism-clike', 'alox-prism-markup-templating'],
-            'javascript' => ['alox-prism-core', 'alox-prism-clike'],
-            'css'        => ['alox-prism-core'],
-            'bash'       => ['alox-prism-core'],
-            'json'       => ['alox-prism-core'],
-            'sql'        => ['alox-prism-core'],
+            'markup'            => [ 'alox-prism-core' ],
+            'clike'             => [ 'alox-prism-core' ],
+            'markup-templating' => [ 'alox-prism-core', 'alox-prism-markup' ],
+            'php'               => [ 'alox-prism-core', 'alox-prism-clike', 'alox-prism-markup-templating' ],
+            'javascript'        => [ 'alox-prism-core', 'alox-prism-clike' ],
+            'css'               => [ 'alox-prism-core' ],
+            'bash'              => [ 'alox-prism-core' ],
+            'json'              => [ 'alox-prism-core' ],
+            'sql'               => [ 'alox-prism-core' ],
         ];
 
-        // Default set. You can still filter this.
-        $langs = apply_filters('alox_code_plus_languages', [
-            'markup', 'clike', 'markup-templating', // keep these three first
+        // Default language list (can be filtered)
+        $langs = apply_filters( 'alox_code_plus_languages', [
+            'markup', 'clike', 'markup-templating',
             'php', 'javascript', 'css', 'bash', 'json', 'sql'
-        ]);
+        ] );
 
-        // Enqueue components with correct deps
-        foreach ($langs as $lang) {
+        foreach ( $langs as $lang ) {
             $handle = "alox-prism-$lang";
-            $deps   = isset($depmap[$lang]) ? $depmap[$lang] : ['alox-prism-core'];
+            $deps   = isset( $depmap[ $lang ] ) ? $depmap[ $lang ] : [ 'alox-prism-core' ];
             wp_enqueue_script(
                 $handle,
-                $prism_base . "/components/prism-{$lang}.min.js",
+                "$prism_base/components/prism-{$lang}.min.js",
                 $deps,
                 null,
                 true
             );
         }
 
-        // UI layer
-        $base = plugin_dir_url(__FILE__);
-        wp_enqueue_style('alox-code-ui', $base . 'assets/css/code-ui.css', [], self::VERSION);
-        wp_enqueue_script('alox-code-ui', $base . 'assets/js/code-ui.js', array_keys(array_flip($langs)) ? ['alox-prism-core'] : ['alox-prism-core'], self::VERSION, true);
+        // Plugin UI (badge + copy)
+        $base = plugin_dir_url( __FILE__ );
+        wp_enqueue_style( 'alox-code-ui', $base . 'assets/css/code-ui.css', [], self::VERSION );
+        wp_enqueue_script( 'alox-code-ui', $base . 'assets/js/code-ui.js', [ 'alox-prism-core' ], self::VERSION, true );
     }
 
     /**
-     * If editors forget to add class="language-xxx", default to "language-markup".
-     * Only touches Gutenberg <pre class="wp-block-code"><code> blocks.
+     * If <code> lacks a language class, add "language-markup".
      */
-    public function ensure_language_class($content) {
+    public function ensure_language_class( $content ) {
         $pattern = '#<pre\s+class="([^"]*wp-block-code[^"]*)"(.*?)>\s*<code(.*?)>(.*?)</code>\s*</pre>#is';
-        $content = preg_replace_callback($pattern, function ($m) {
-            $preClass = $m[1];
-            $preAttrs = $m[2];
+
+        return preg_replace_callback( $pattern, function ( $m ) {
+            $preClass  = $m[1];
+            $preAttrs  = $m[2];
             $codeAttrs = $m[3];
+            $codeInner = $m[4];
 
-            // If code tag lacks a language class, append language-markup.
-            if (strpos($codeAttrs, 'language-') === false) {
-                // Add class attribute or append to it.
-                if (preg_match('/class="([^"]*)"/i', $codeAttrs, $cm)) {
-                    $new = preg_replace(
-                        '/class="([^"]*)"/i',
-                        'class="$1 language-markup"',
-                        $codeAttrs
-                    );
-                    $codeAttrs = $new;
-                } else {
-                    $codeAttrs = rtrim($codeAttrs) . ' class="language-markup"';
-                }
+            // If <code> already has a language- class, return as-is
+            if ( strpos( $codeAttrs, 'language-' ) !== false ) {
+                return "<pre class=\"{$preClass}\"{$preAttrs}><code{$codeAttrs}>{$codeInner}</code></pre>";
             }
-            // Return reconstructed block.
-            return '<pre class="' . $preClass . '"' . $preAttrs . '><code' . $codeAttrs . '>' . $m[4] . '</code></pre>';
-        }, $content);
 
-        return $content;
+            // Try to detect language from <pre>
+            $lang = 'markup';
+            if ( preg_match( '/language-([\w+-]+)/i', $preClass, $match ) ) {
+                $lang = $match[1];
+            }
+
+            // Append class to <code>
+            if ( preg_match( '/class="([^"]*)"/i', $codeAttrs ) ) {
+                $codeAttrs = preg_replace( '/class="([^"]*)"/i', 'class="$1 language-' . esc_attr( $lang ) . '"', $codeAttrs );
+            } else {
+                $codeAttrs = rtrim( $codeAttrs ) . ' class="language-' . esc_attr( $lang ) . '"';
+            }
+
+            return "<pre class=\"{$preClass}\"{$preAttrs}><code{$codeAttrs}>{$codeInner}</code></pre>";
+        }, $content );
     }
 
     /**
-     * Add data-lang attribute to <pre> based on the detected language class
-     * so the badge can display a friendly label. Honors any existing data-lang.
+     * Add data-lang="xxx" to <pre> based on <code class="language-xxx">.
      */
-    public function add_data_lang_from_class($content) {
+    public function add_data_lang_from_class( $content ) {
         $pattern = '#<pre\s+class="([^"]*wp-block-code[^"]*)"(.*?)>\s*<code([^>]*)>#is';
-        $content = preg_replace_callback($pattern, function ($m) {
-            $preClass = $m[1];
-            $preAttrs = $m[2];
-            $codeAttrs = $m[3];
+        return preg_replace_callback( $pattern, function ( $m ) {
+            if ( stripos( $m[2], 'data-lang=' ) !== false ) {
+                return $m[0];
+            }
 
-            // Skip if data-lang already present.
-            if (stripos($preAttrs, 'data-lang=') !== false) return $m[0];
-
-            // Extract language from code tag class
             $lang = 'text';
-            if (preg_match('/language-([\w+-]+)/i', $codeAttrs, $lm)) {
+            if ( preg_match( '/language-([\w+-]+)/i', $m[3], $lm ) ) {
                 $lang = $lm[1];
             }
 
-            // Inject data-lang into the <pre> open tag.
-            $preOpen = '<pre class="' . $preClass . '"' . $preAttrs . ' data-lang="' . esc_attr($lang) . '">';
-            return $preOpen . '<code' . $codeAttrs . '>';
-        }, $content);
-
-        return $content;
+            return '<pre class="' . $m[1] . '"' . $m[2] . ' data-lang="' . esc_attr( $lang ) . '"><code' . $m[3] . '>';
+        }, $content );
     }
 
     /**
-     * Defer our scripts to avoid blocking render.
+     * Add defer to Prism and plugin scripts.
      */
-    public function add_defer($tag, $handle, $src) {
-        $targets = ['alox-prism-core', 'alox-code-ui'];
-        if (in_array($handle, $targets, true) || strpos($handle, 'alox-prism-') === 0) {
-            if (strpos($tag, 'defer') === false) {
-                $tag = str_replace('<script ', '<script defer ', $tag);
+    public function add_defer( $tag, $handle, $src ) {
+        if ( strpos( $handle, 'alox-prism-' ) === 0 || in_array( $handle, [ 'alox-prism-core', 'alox-code-ui' ], true ) ) {
+            if ( strpos( $tag, 'defer' ) === false ) {
+                $tag = str_replace( '<script ', '<script defer ', $tag );
             }
         }
         return $tag;
@@ -157,12 +160,14 @@ final class Alox_Code_Plus {
 Alox_Code_Plus::instance();
 
 /**
- * Developer API:
+ * Developer API Example:
  *
+ * // Add or change language components
  * add_filter('alox_code_plus_languages', function($langs) {
  *     return ['php','javascript','css','bash','json','sql','yaml'];
  * });
  *
+ * // Customize Prism theme
  * add_filter('alox_code_plus_prism_theme_url', function($url) {
  *     return 'https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-okaidia.min.css';
  * });
