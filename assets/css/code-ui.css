@@ -1,0 +1,51 @@
+/* Container */
+.alox-codeui {
+    position: relative;
+    margin: 1.25rem 0;
+    border: 1px solid #eeeeee;
+    border-radius: 0.25rem;
+}
+
+/* Space for toolbar */
+.alox-codeui > pre {
+    padding-top: 3rem;
+    overflow: auto;
+    border-radius: 0.25rem;
+    box-shadow: inset 0 0 0 1px rgba(127,127,127,0.15);
+}
+
+/* Toolbar */
+.alox-codeui__toolbar {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+    z-index: 2;
+}
+
+/* Language badge */
+.alox-codeui__lang, .alox-codeui__copy {
+    font: 600 0.75rem/1 system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+    padding: 0.4rem 0.6rem;
+    border: 1px solid rgba(127,127,127,0.35);
+    border-radius: 0.35rem;
+    background: rgba(255,255,255,0.75);
+}
+.alox-codeui__copy {cursor: pointer;}
+.alox-codeui__copy:disabled { opacity: 0.6; cursor: default; }
+
+/* Dark mode polish */
+@media (prefers-color-scheme: dark) {
+    .alox-codeui__lang { background: rgba(255,255,255,0.5); }
+    .alox-codeui__copy {
+        background: rgba(255,255,255,0.75);
+        border-color: rgba(255,255,255,0.75);
+    }
+}
+
+/* Prism consistency for Gutenberg code block */
+pre[class*="language-"] {
+    margin: 0;
+}
