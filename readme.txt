@@ -1,5 +1,5 @@
 === Alox Code+ ===
-Contributors: aloxco
+Contributors: aloxandco
 Tags: code, syntax highlighting, prism, gutenberg, copy to clipboard, developer tools
 Requires at least: 5.8
 Tested up to: 6.6
