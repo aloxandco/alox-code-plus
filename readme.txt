@@ -1,12 +1,12 @@
 === Alox Code+ ===
-Contributors: aloxco
-Tags: code, syntax highlighting, prism, gutenberg, copy to clipboard, developer tools
+Contributors: aloxandco
+Tags: code, syntax highlighting, prism, wordpress, plugin, gutenberg, copy to clipboard, developer tools
 Requires at least: 5.8
 Tested up to: 6.6
 Requires PHP: 7.4
 Stable tag: 1.0.0
-License: MIT
-License URI: https://opensource.org/licenses/MIT
+License: GPL-2.0+
+License URI: https://www.gnu.org/licenses/gpl-2.0.html
 Plugin URI: https://codex.alox.co/plugins/alox-code-plus/
 Author URI: https://alox.co
 Text Domain: alox-code-plus

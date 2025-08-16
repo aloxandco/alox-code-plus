@@ -1,16 +1,22 @@
 <?php
-/**
- * Plugin Name: Alox Code+
- * Plugin URI: https://codex.alox.co/plugins/alox-code-plus/
- * Description: Lightweight code UI for dev blogs. Adds Prism highlighting, language badges, and one-click copy to Gutenberg code blocks.
- * Version: 1.0.0
- * Author: Alox & Co
- * Author URI: https://alox.co
- * License: MIT
- * License URI: https://opensource.org/licenses/MIT
- * Text Domain: alox-code-plus
- * Domain Path: /languages
- */
+/*
+Plugin Name: Alox Code+
+Plugin URI: https://codex.alox.co/wordpress-plugins/alox-code-plus/
+Description: A free, zero-config WordPress plugin that beautifies Gutenberg Code blocks with Prism.js. code, syntax highlighting, prism, wordpress, plugin, gutenberg, copy to clipboard, developer tools
+Version: 1.0.0
+Author: Alox & Co
+Author URI: https://alox.co
+License: GPL-2.0+
+License URI: https://www.gnu.org/licenses/gpl-2.0.html
+Text Domain: alox-code-plus
+
+Copyright (C) 2025 Alox & Co (https://alox.co)
+This program is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License, version 2 or later.
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+*/
 
 if ( ! defined( 'ABSPATH' ) ) {
     exit;

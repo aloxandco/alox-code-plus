@@ -16,6 +16,7 @@
     border-radius: 0.25rem;
     box-shadow: inset 0 0 0 1px rgba(127, 127, 127, 0.15);
     margin: 0;
+    background: var(--bs-dark);
 }
 
 /* Toolbar */
